@@ -1,0 +1,90 @@
+import java.sql.*;
+import java.util.Scanner;
+
+public class CrudOperations {
+
+	public static void main(String[] args) throws SQLException {
+		Connection connection=null;
+		PreparedStatement pstmt=null; 
+		ResultSet resultSet=null;
+		Scanner scan=new Scanner(System.in);  
+		int exit=1; 
+		try {
+		    while(exit==1) { 
+			    connection=JdbcConnection.getJdbcConnection();
+			    if(connection!=null) { 
+				   System.out.println("enter C r R r U r D: "); 
+				   String check=scan.next(); 
+			       switch(check) {
+			           case "C": 
+			        	   System.out.println("enter uniquie d_id, number: "); 
+			        	   int d_id=scan.nextInt();
+			        	   System.out.println("enter branch: "); 
+			        	   String branch=scan.next();
+			        	   System.out.println("enter location: "); 
+			        	   String loc=scan.next(); 
+			        	   String insertData="insert into department(d_id,d_branch,d_loc) values(?,?,?)";
+			        	   pstmt=connection.prepareStatement(insertData); 
+			        	   if(pstmt!=null) {
+			        		   pstmt.setInt(1, d_id); 
+			        		   pstmt.setString(2,branch); 
+			        		   pstmt.setString(3, loc); 
+			        		   int rowsModified=pstmt.executeUpdate();
+			        		   System.out.println("no of rows modified: "+rowsModified);
+			        		   
+			        	   }break; 
+			           case "R": 
+			        	   String readData="select * from department"; 
+			               pstmt=connection.prepareStatement(readData);
+			               if(pstmt!=null) {
+			            	   resultSet =pstmt.executeQuery(); 
+			            	   System.out.println("D_ID\tD_B\tD_L");
+			            	   if(resultSet!=null) {
+			            		   while(resultSet.next()) {
+			            			   int id=resultSet.getInt(1);
+			            			   String branchName=resultSet.getString(2); 
+			            			   String location=resultSet.getString(3);
+			            			   System.out.println(id+"\t"+branchName+"\t"+location);
+			            		   }
+			            	   }
+			               }break; 
+			           case "U": 
+			        	   String updateData="update department set d_loc='nellore' where d_id=?"; 
+			        	   pstmt=connection.prepareStatement(updateData);
+			        	   System.out.println("enter d_id to modify that row: "); 
+			        	   int Uid=scan.nextInt(); 
+			        	   if(pstmt!=null) {
+			        	      pstmt.setInt(1, Uid); 
+			        	      int rowsModified=pstmt.executeUpdate();  
+			        	      System.out.println("no of rows updated: "+rowsModified);
+			        	   } break; 
+			           case "D": 
+			        	   String deleteData="delete from department where d_id=?"; 
+			        	   pstmt=connection.prepareStatement(deleteData);
+			        	   System.out.println("enter id number to delete that row: "); 
+			        	   int Did=scan.nextInt(); 
+			        	   if(pstmt!=null) {
+			        		   pstmt.setInt(1, Did); 
+			        		   int rowsModified=pstmt.executeUpdate();
+			        		   System.out.println(rowsModified);
+			        		   System.out.println("no of rows updated "+rowsModified);
+		
+			        	   }break;
+			           default: System.out.println("hey! enter the valid operation to work on data");
+			       }
+			   } 
+			    System.out.println("enter 1 to continue else 0");
+			    exit=scan.nextInt();
+		    } 
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}finally { 
+			if(scan!=null)
+			    scan.close();
+			JdbcConnection.jdbsClose(null, pstmt, connection); 
+			
+		}
+		
+	}
+
+}
