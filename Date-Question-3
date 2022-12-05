@@ -1,0 +1,108 @@
+import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Scanner;
+public class DateObjectAssignment { 
+	public static void closeJdbc(ResultSet resultSet,Statement statement, Connection connection) throws SQLException {
+		if(resultSet!=null) {
+			resultSet.close();
+		} 
+		if(statement!=null) {
+			statement.close();
+		}
+		if(connection!=null) {
+			connection.close();
+		} 
+		System.out.println("Thankyoy!....");
+		System.out.println("Application terminated");
+	}
+
+	public static void main(String[] args) throws SQLException, ParseException {
+		Connection connection=null;
+		PreparedStatement pstmt=null; 
+		ResultSet resultSet=null; 
+		Scanner scan=new Scanner(System.in);
+		String url="jdbc:mysql://localhost:3306/enterprice_java"; 
+		String user="root";
+		String password="Achari@2001"; 
+		connection=DriverManager.getConnection(url, user, password);
+//		if(connection!=null) { 
+//			String createTable="create table userdata(u_id int not null,u_name varchar(20),"
+//					+ "dob varchar(20),dom varchar(20),doj varchar(20), primary key(u_id))"; 
+//		    pstmt=connection.prepareStatement(createTable); 
+//		    pstmt.execute();
+//		} 
+		SimpleDateFormat sdfDob=new SimpleDateFormat("dd-MM-yyyy"); 
+		SimpleDateFormat sdfDom=new SimpleDateFormat("MM-dd-yyyy"); 
+		SimpleDateFormat sdfDoj=new SimpleDateFormat("yyyy-MM-dd");
+		int check=1;
+		while(check==1) {
+			System.out.println("enter insert to add data & retrive to print data: "); 
+			String value=scan.next();
+			switch(value) {
+			  case "insert": 
+				 System.out.println("enter uniq id: "); 
+				 int id=scan.nextInt();
+				 System.out.println("enter the name: "); 
+				 String name=scan.next(); 
+				 System.out.println("enter dob::(dd-mm-yyyy) "); 
+				 String Dob=scan.next();  
+				 System.out.println("enter dom:: (mm-dd-yyyy) "); 
+				 String Dom=scan.next(); 
+				 
+				 System.out.println("enter doj:: (yyyy-mm-dd) "); 
+				 String Doj=scan.next(); 
+				 
+				 java.util.Date uDob= sdfDob.parse(Dob);
+				
+				 java.util.Date uDom=sdfDom.parse(Dom);
+				
+				
+				
+				 long b=uDob.getTime(); 
+				 long m=uDom.getTime();
+				
+				 java.sql.Date dob=new Date(b);
+				 java.sql.Date dom=new Date(m); 
+				 java.sql.Date doj=java.sql.Date.valueOf(Doj);
+				 
+				 String inserData="insert into userdata values(?,?,?,?,?)"; 
+				 pstmt=connection.prepareStatement(inserData);
+				 if(pstmt!=null) {
+					 pstmt.setInt(1, id);
+					 pstmt.setString(2, name); 
+					 pstmt.setDate(3,dob); 
+					 pstmt.setDate(4,dom);
+					 pstmt.setDate(5,doj); 
+					 int rowsAffected=pstmt.executeUpdate(); 
+				    System.out.println("no of rows affected: "+rowsAffected);
+				 }break;
+			  case "retrive": 
+				  String readData="select u_id,u_name,dob,dom,doj from userdata";
+				  pstmt=connection.prepareStatement(readData);
+				  if(pstmt!=null) {
+					  resultSet=pstmt.executeQuery(); 
+				  } 
+				  if(resultSet!=null) { 
+					  System.out.println("u_id\tu_name\tdob\t\tdom\t\tdoj");
+					  while(resultSet.next()) {
+						  int id1=resultSet.getInt(1); 
+						  String name1=resultSet.getString(2);
+						  java.sql.Date dob1=resultSet.getDate(3);
+						  java.sql.Date dom1=resultSet.getDate(4);
+						  java.sql.Date doj1=resultSet.getDate(5);
+						  String dob11=sdfDob.format(dob1);
+						  String dom11=sdfDom.format(dom1);
+						  String doj11=sdfDoj.format(doj1); 
+						  System.out.println(id1+"\t"+name1+"\t"+dob11+"\t"+dom11+"\t"+doj11);
+					  }
+				  }break;
+				default: System.out.println("Hey!.....enter the correct value");
+			}
+			System.out.println("enter 1 to continue to work with data else 0");
+			check=scan.nextInt(); 
+			
+		} 
+		DateObjectAssignment.closeJdbc(resultSet, pstmt, connection);
+	}
+}
